@@ -2,22 +2,21 @@ import random, os
 
 class Player:
     def __init__(self, numb, board):
-        self.playerNumber = numb
+        self.__playerNumber = numb
         self.playerBoard = board
         self.ships = ["Carrier", "Battleship", "Destroyer", "Submarines", "Patrol Boat"]
 
-        self.maxColumn = len(self.playerBoard[0]) - 1
-        self.letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        self.maxLetter = self.letters[len(self.playerBoard) - 2]
-
     def player(self):
-        print("\nPlayer: ", self.playerNumber)
+        print("\nPlayer: ", self.__playerNumber)
 
     def getNumber(self):
-        return self.playerNumber
+        return self.__playerNumber
 
     def getBoard(self):
         return self.playerBoard
+    
+    def setBoard(self, board):
+        self.playerBoard = board
 
     def testValid(self, direc, size, x, y):  # Tests if ship placement is valid
         try:
@@ -32,10 +31,27 @@ class Player:
         except:
             return False
         return True
+    
+    def display(self, column):
+        os.system('cls')
+        print("\n Your Board:")
+        for y in range(len(self.playerBoard)):
+            for x in range(len(self.playerBoard[y])):
+                if y == 0:
+                    print(self.playerBoard[y][x], end="   ")
+                else:
+                    print(self.playerBoard[y][x], end=" | ")
+            print("\n" + "  " + "-" * ((column * 4) - 2))
 
 class HumanPlayer(Player):
     def __init__(self, numb, board):
         super().__init__(numb, board)
+
+        self.__maxColumn = len(self.playerBoard[0]) - 1
+        self.__letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.__maxLetter = self.__letters[len(self.playerBoard) - 2]
+
+        self.placeShips()
 
     def placeShips(self):  #gets valid ship placements - replays to gameboard  - Display confriming message that all ships are placed
         print("\nWelcome captain! Your fleet consists of: \n - A Carrier (size:5) \n - A Battleships (size:4) \n - A Destroyer (size:3) \n - A Submarine (size:2) \n - A Patrol Boat (size:1)")
@@ -51,7 +67,7 @@ class HumanPlayer(Player):
 
             while True:
                 column = self.getColumn(size, direc)  # placeing
-                rowIndex = self.letters.index(self.getRow(size,direc)) + 1  #placing
+                rowIndex = self.__letters.index(self.getRow(size,direc)) + 1  #placing
                 if self.testValid(direc, size, column, rowIndex) == True:
                     if direc == 1:  # this is part of placing the ships
                         for i in range(size):
@@ -68,18 +84,17 @@ class HumanPlayer(Player):
                     break
                 else:
                     print("Ships collide. Please enter new coordintes.")
-        return self.playerBoard
+        
 
     def takeShot(self):  # gets vaild coordinates - sends to gameboard.takeshot() - relays results of shot
-        x = int(input(f"Enter column to shoot (1-{self.maxColumn}): "))
-        while x < 1 or x > self.maxColumn:
-            x = int(input(f"Invalid column. Re-enter column number for the ship's front (1-{self.maxColumn}): "))
+        x = int(input(f"Enter column to shoot (1-{self.__maxColumn}): "))
+        while x < 1 or x > self.__maxColumn:
+            x = int(input(f"Invalid column. Re-enter column number for the ship's front (1-{self.__maxColumn}): "))
 
-        y = input(f"Enter row letter for ship's front (A-{self.maxLetter}): ").upper()
-        while not (y >= "A" or y <= self.maxLetter):
-            y = input(
-                f"Invalid column. Re-enter column number for the ship's front (A-{self.maxLetter}): ").upper()
-        y = self.letters.index(y) + 1
+        y = input(f"Enter row letter for ship's front (A-{self.__maxLetter}): ").upper()
+        while not (y >= "A" or y <= self.__maxLetter):
+            y = input(f"Invalid column. Re-enter column number for the ship's front (A-{self.__maxLetter}): ").upper()
+        y = self.__letters.index(y) + 1
 
         return x, y
 
@@ -87,24 +102,24 @@ class HumanPlayer(Player):
         while True:
             try:
                 if direc == 2:  # part of placing the ships
-                    newMaxColumn = (self.maxColumn - size) + 1
+                    newMaxColumn = (self.__maxColumn - size) + 1
                 else:
-                    newMaxColumn = self.maxColumn
+                    newMaxColumn = self.__maxColumn
                 x = int(input(f"Enter column number for the ship's front (1-{newMaxColumn}): "))
                 while x < 1 or x > newMaxColumn:
                     x = int(
                         input(f"Invalid column. Re-enter column number for the ship's front (1-{newMaxColumn}): "))
                 return x
             except:
-                print("Not a interger. Try again: ")
+                print("Not a interger. Try again. ")
 
     def getRow(self, size, direc):  # gets valid row
         while True:
             try:
                 if direc == 1:
-                    newMaxLetter = self.letters[(self.letters.index(self.maxLetter) - size) + 1]
+                    newMaxLetter = self.__letters[(self.__letters.index(self.__maxLetter) - size) + 1]
                 else:
-                    newMaxLetter = self.maxLetter
+                    newMaxLetter = self.__maxLetter
                 y = input(f"Enter row Letter for the ship's front (A-{newMaxLetter}): ").upper()
                 while not ((y >= "A" or y <= newMaxLetter)):
                     y = input(f"Invalid column. Re-enter column number for the ship's front (A-{newMaxLetter}):").upper()
@@ -113,6 +128,14 @@ class HumanPlayer(Player):
                 print("Not a letter. Try again")
 
 class ComputerPlayer(Player):
+    def __init__(self, numb, board):
+        super().__init__(numb, board)
+
+        self.__maxColumn = len(self.playerBoard[0]) - 1
+        self.__letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.__maxLetter = self.__letters[len(self.playerBoard) - 2]
+
+        self.placeShips()
 
     def placeShips(self):
 
@@ -122,7 +145,7 @@ class ComputerPlayer(Player):
 
             while True:
                 column = self.getColumn(size, direc)  # placeing
-                rowIndex = self.letters.index(self.getRow(size,direc)) + 1  #placing
+                rowIndex = self.__letters.index(self.getRow(size,direc)) + 1  #placing
                 if self.testValid(direc, size, column, rowIndex) == True:
                     if direc == 1:  # this is part of placing the ships
                         for i in range(size):
@@ -138,59 +161,55 @@ class ComputerPlayer(Player):
                                 pass
                     break
                 else:
-                    print("Ships collide. Please enter new coordintes.")
-        return self.playerBoard
+                    pass
 
     def takeShot(self):
-        x = random.randint(1, self.maxColumn)
-        y = random.randint(1, self.letters.index(self.maxLetter))
+        x = random.randint(1, self.__maxColumn)
+        y = random.randint(1, self.__letters.index(self.__maxLetter))
         return x, y
 
     def getColumn(self, size, direc):
         if direc == 2:  # part of placing the ships
-            newMaxColumn = (self.maxColumn - size) + 1
+            newMaxColumn = (self.__maxColumn - size) + 1
         else:
-            newMaxColumn = self.maxColumn
+            newMaxColumn = self.__maxColumn
         x = random.randint(1, newMaxColumn)
         return x
 
     def getRow(self, size, direc):  # gets valid row
         if direc == 1:
-            newMaxLetter = self.letters[(self.letters.index(self.maxLetter) - size) + 1]
+            newMaxLetter = self.__letters[(self.__letters.index(self.__maxLetter) - size) + 1]
         else:
-            newMaxLetter = self.maxLetter
-        y = self.letters[random.randint(1, self.letters.index(newMaxLetter))]
+            newMaxLetter = self.__maxLetter
+        y = self.__letters[random.randint(1, self.__letters.index(newMaxLetter))]
         return y
 
 class GameBoard:
     def __init__(self):
-        self.columns, self.rows = self.BoardSize()
-        self.PlayerBoard = self.CreateBoard()
-        self.displayBoard = self.CreateBoard()
-        self.ComputerBoard = self.CreateBoard()
+        self.__columns, self.__rows = self.BoardSize()
 
-        self.players = [self.PlayerBoard, self.ComputerBoard]
+        self.__displayBoard = self.CreateBoard()
 
     def BoardSize(self):
-        self.columns = int(input("\nEnter the number of columns: ")) + 1
-        while self.columns < 11 or self.columns > 27:
-            self.columns = int(
-                input("Invalid input. Re-enter the number of columns: ")) + 1
+        self.__columns = int(input("\nEnter the number of columns (11-27): ")) + 1
+        while self.__columns < 11 or self.__columns > 27:
+            self.__columns = int(
+                input("Invalid input. Re-enter the number of columns (11-27): ")) + 1
 
-        self.rows = int(input("\nEnter the number of rows: ")) + 1
-        while self.rows < 11 or self.rows > 27:
-            self.rows = int(
-                input("Invalid input. Re-enter the number of rows: ")) + 1
+        self.__rows = int(input("\nEnter the number of rows (11-27): ")) + 1
+        while self.__rows < 11 or self.__rows > 27:
+            self.__rows = int(
+                input("Invalid input. Re-enter the number of rows (11-27): ")) + 1
 
-        return self.columns, self.rows
+        return self.__columns, self.__rows
 
     def CreateBoard(self):
-        letters = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.__letters = " ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         board = []
-        for y in range(self.rows):
+        for y in range(self.__rows):
             board.append([])
-            board[y].append(letters[y])
-            for x in range(self.columns - 1):
+            board[y].append(self.__letters[y])
+            for x in range(self.__columns - 1):
                 if y == 0:
                     board[y].append(str(x + 1))
                 else:
@@ -199,77 +218,59 @@ class GameBoard:
         return board
 
     def display(self):  # displays player's board
-        os.system('cls')
-        print("\n Player's Board:")
-        for y in range(len(self.PlayerBoard)):
-            for x in range(len(self.PlayerBoard[y])):
-                if y == 0:
-                    print(self.PlayerBoard[y][x], end="   ")
-                else:
-                    print(self.PlayerBoard[y][x], end=" | ")
-            print("\n" + "  " + "-" * ((self.columns * 4) - 2))
 
         print("\n Enemy Board status: ")
-        for y in range(len(self.displayBoard)):
-            for x in range(len(self.displayBoard[y])):
+        for y in range(len(self.__displayBoard)):
+            for x in range(len(self.__displayBoard[y])):
                 if y == 0:
-                    print(self.displayBoard[y][x], end="   ")
+                    print(self.__displayBoard[y][x], end="   ")
                 else:
-                    print(self.displayBoard[y][x], end=" | ")
-            print("\n" + "  " + "-" * ((self.columns * 4) - 2))
+                    print(self.__displayBoard[y][x], end=" | ")
+            print("\n" + "  " + "-" * ((self.__columns * 4) - 2))
 
     def getWidth(self):
-        return self.columns
+        return self.__columns
 
     def getHight(self):
-        return self.rows
+        return self.__rows
 
-    def takeShot(self, playerNum, x, y):  # takes shot a recived coordinates and returns results
-        if playerNum == 1:
-            TargetBoard = self.ComputerBoard
-        else:
-            TargetBoard = self.PlayerBoard
-        if TargetBoard[y][x] == "S":
+    def takeShot(self, player, x, y):  # takes shot a recived coordinates and returns results
+        targetBoard = player.getBoard()
+        if targetBoard[y][x] == "S":
             status = "H"
             print("hit")
         else:
             status = "X"
             print("miss")
 
-        TargetBoard[y][x] = status
-        if playerNum == 1:
-            self.displayBoard[y][x] = status
+        targetBoard[y][x] = status
+        player.setBoard(targetBoard)
 
-    def placeShips(self, HumanBoard, ComputerBoard):  # places ships on respective boards and updates all boards
-        self.PlayerBoard = HumanBoard
-        self.ComputerBoard = ComputerBoard
+        if player.getNumber() == 2:
+            self.__displayBoard[y][x] = status
 
-    def checkWinner(self, numb):  # tests if all ships(S) are hit(X)
-        if numb == 1:
-            CheckBoard = ComputerPlayer.getBoard()
-        else:
-            CheckBoard = HumanPlayer.getBoard()
-        print(f"\n\n{CheckBoard}\n\n")
+    def checkWinner(self, playerNum, enemyBoard):  # tests if all ships(S) are hit(X)
+        CheckBoard = enemyBoard
         hits = [x for y in range(1, len(CheckBoard)) for x in range(1, len(CheckBoard[y])) if CheckBoard[y][x] == "H"]
-        print(hits)
-        print(f"Player {numb}: {len(hits)} hits")
+        print(f"Player {playerNum}: {len(hits)} hits")
         if len(hits) == 15:
-            print(f"Player {numb} wins!")
+            print(f"Player {playerNum} wins!")
             os.system('quit')
 
 
 GameBoard = GameBoard()
-HumanPlayer = HumanPlayer(1, GameBoard.PlayerBoard)
-ComputerPlayer = ComputerPlayer(2, GameBoard.ComputerBoard)
+HumanPlayer = HumanPlayer(1, GameBoard.CreateBoard())
+ComputerPlayer = ComputerPlayer(2, GameBoard.CreateBoard())
 players = [HumanPlayer, ComputerPlayer]
-
-GameBoard.display()
-GameBoard.placeShips(HumanPlayer.placeShips(), ComputerPlayer.placeShips())
 
 while True:
     for player in players:
+        EnemyPlayer = ComputerPlayer if player == HumanPlayer else HumanPlayer
+        GameBoard.checkWinner(player.getNumber(), EnemyPlayer.getBoard())
+
         if player == HumanPlayer:
+            player.display(GameBoard.getWidth())
             GameBoard.display()
-        GameBoard.checkWinner(player.getNumber())
+        
         x, y = player.takeShot()
-        GameBoard.takeShot(player.getNumber(), x, y)
+        GameBoard.takeShot(EnemyPlayer, x, y)
